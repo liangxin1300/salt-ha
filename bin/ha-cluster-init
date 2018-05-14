@@ -70,6 +70,17 @@ def _input(msg, default, val_func, data=None):
                 return re.split(r'[ ,|]', _res)
 
 
+def _ask(msg):
+    while True:
+        ans = raw_input(msg)
+        if not ans:
+            ans = 'y'
+        if ans:
+            ans = ans[0].lower()
+            if ans in 'yn':
+                return ans == 'y'
+
+
 def choose_cluster_nodes(nodes_list):
     msg = "Input cluster nodes [%s]: " % ' '.join(node_list)
     return _input(msg, ' '.join(node_list), validate_data, node_list)
@@ -115,3 +126,9 @@ if __name__ == '__main__':
     service_list = "base sbd vip ocfs2".split()
     services = choose_services(service_list)
     p_info("Services: %s" % ' '.join(services))
+
+    print("")
+    if _ask("Confirm? [Y/N] "):
+        print("continue")
+    else:
+        print("bye")
