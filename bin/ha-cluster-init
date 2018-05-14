@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+
+# link to salt runner
+# [10.10.10.0]
+# [239.137.131.248]
+# [5405]
+
+# sbd
+
+import sys
+import re
+import salt.client
+
+
+_OK = '\033[92m'
+_WARNING = '\033[93m'
+_ERROR = '\033[91m'
+_BOLD = '\033[1m'
+_END = '\033[0m'
+
+
+def p_info(msg):
+    print(_OK + _BOLD + msg + _BOLD + _END)
+
+
+def p_warning(msg):
+    print(_WARNING + _BOLD + msg + _BOLD + _END)
+
+
+def p_err(msg):
+    print(_ERROR + _BOLD + msg + _BOLD + _END)
+
+
+def raw_input(prompt=""):
+    try:
+        text = input(prompt)
+    except KeyboardInterrupt:
+        print("\nbye")
+        return 
+    
+    return text.strip()
+
+
+def validate_cluster_nodes(origin, _inputs):
+    _nodes = re.split(r'[ ,|]', _inputs)
+    for _node in _nodes:
+        if _node not in origin:
+            p_err("Error: %s not in [%s]" % (_node, ' '.join(origin)))       
+            return False
+    return True
+
+
+if __name__ == '__main__':
+    local = salt.client.LocalClient()
+    res = local.cmd('*', 'network.subnets')
+    node_list = list(res.keys())
+
+    _nodes = raw_input("Input cluster nodes [%s]: " % ' '.join(node_list))
+    if not validate_cluster_nodes(node_list, _nodes):
+        sys.exit(1)
+
