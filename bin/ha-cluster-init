@@ -55,9 +55,10 @@ def validate_cluster_nodes(origin, _inputs):
 
 
 def choose_cluster_nodes(nodes_list):
-    print("")
     while True:
         _nodes = raw_input("Input cluster nodes [%s]: " % ' '.join(node_list))
+        if not _nodes:
+            _nodes = ' '.join(node_list)
         if validate_cluster_nodes(node_list, _nodes):
             return re.split(r'[ ,|]', _nodes)
 
@@ -69,9 +70,10 @@ def choose_bindnet_address(data, cluster_nodes):
             _temp &= set(data[node])
     _common_addrs = [ x.split('/')[0] for x in _temp ]
 
-    print("")
     while True:
         _addr = raw_input("Input bindnet address [%s]:" % ' '.join(_common_addrs))
+        if not _addr:
+            _addr = _common_addrs[0]
         if _addr not in _common_addrs:
             p_err("'%s' not in [%s]" % (_addr, ' '.join(_common_addrs)))
         else:
@@ -79,7 +81,6 @@ def choose_bindnet_address(data, cluster_nodes):
 
 
 def input_cluster_port():
-    print("")
     while True:
         port = raw_input("Input port [5405]: ")
         if not port:
@@ -96,10 +97,12 @@ if __name__ == '__main__':
     res = local.cmd('*', 'network.subnets')
     node_list = list(res.keys())
 
+    print("")
     cluster_nodes   = choose_cluster_nodes(node_list)
     bindnet_address = choose_bindnet_address(res, cluster_nodes)
     cluster_port    = input_cluster_port()
 
-    print(cluster_nodes)
-    print(bindnet_address)
-    print(cluster_port)
+    print("")
+    p_info("Cluster nodes:   [%s]" % ' '.join(cluster_nodes))
+    p_info("Bindnet address: %s" % bindnet_address)
+    p_info("Port:            %s" % cluster_port)
