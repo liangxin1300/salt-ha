@@ -45,11 +45,11 @@ def raw_input(prompt=""):
     return text.strip()
 
 
-def validate_cluster_nodes(origin, _inputs):
-    _nodes = re.split(r'[ ,|]', _inputs)
-    for _node in _nodes:
-        if _node not in origin:
-            p_err("'%s' not in [%s]" % (_node, ' '.join(origin)))
+def validate_data(origin, _inputs):
+    _items = re.split(r'[ ,|]', _inputs)
+    for _item in _items:
+        if _item not in origin:
+            p_err("'%s' not in [%s]" % (_item, ' '.join(origin)))
             return False
     return True
 
@@ -59,7 +59,7 @@ def choose_cluster_nodes(nodes_list):
         _nodes = raw_input("Input cluster nodes [%s]: " % ' '.join(node_list))
         if not _nodes:
             _nodes = ' '.join(node_list)
-        if validate_cluster_nodes(node_list, _nodes):
+        if validate_data(node_list, _nodes):
             return re.split(r'[ ,|]', _nodes)
 
 
@@ -78,6 +78,15 @@ def choose_bindnet_address(data, cluster_nodes):
             p_err("'%s' not in [%s]" % (_addr, ' '.join(_common_addrs)))
         else:
             return _addr
+
+
+def choose_services(services):
+    while True:
+       _services = raw_input("Choose services [%s]:" % services)
+       if not _services:
+           _services = "base"
+       if validate_data(services.split(), _services):
+            return re.split(r'[ ,|]', _services)
 
 
 def input_cluster_port():
@@ -106,3 +115,9 @@ if __name__ == '__main__':
     p_info("Cluster nodes:   [%s]" % ' '.join(cluster_nodes))
     p_info("Bindnet address: %s" % bindnet_address)
     p_info("Port:            %s" % cluster_port)
+
+    print("")
+    service_string = "base sbd vip ocfs2"
+    services = choose_services(service_string)
+    print("")
+    p_info("Services: %s" % ' '.join(services))
