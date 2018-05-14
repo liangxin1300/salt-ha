@@ -47,7 +47,11 @@ def validate_data(_inputs, origin):
 
 
 def validate_port(port, data=None):
-    if int(port) >= 1024 and int(port) <= 65535:
+    try:
+        port = int(port)
+    except ValueError:
+        return False
+    if port >= 1024 and port <= 65535:
         return True
     else:
         p_err("'%s' is invalid" % port)
