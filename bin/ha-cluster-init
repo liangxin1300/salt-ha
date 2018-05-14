@@ -68,7 +68,10 @@ def _input(msg, default, val_func, data=None):
         if not _res:
             _res = default
         if val_func(_res, data):
-            return re.split(r'[ ,|]', _res)
+            if isinstance(_res, int):
+                return _res
+            else:
+                return re.split(r'[ ,|]', _res)
 
 
 def choose_cluster_nodes(nodes_list):
@@ -85,33 +88,16 @@ def choose_bindnet_address(data, cluster_nodes):
 
     msg = "Input bindnet address [%s]:" % ' '.join(_common_addrs)
     return _input(msg, _common_addrs[0], validate_data, _common_addrs)
-    """
-    while True:
-        _addr = raw_input("Input bindnet address [%s]:" % ' '.join(_common_addrs))
-        if not _addr:
-            _addr = _common_addrs[0]
-        if validate_data(_common_addrs, _addr):
-            return _addr
-    """
+
 
 def choose_services(services):
-    while True:
-       _services = raw_input("Choose services [%s]:" % services)
-       if not _services:
-           _services = "base"
-       if validate_data(services.split(), _services):
-            return re.split(r'[ ,|]', _services)
+    msg = "Choose services [%s]:" % ' '.join(services)
+    return _input(msg, "base", validate_data, services)
 
 
 def input_cluster_port():
-    while True:
-        port = raw_input("Input port [5405]: ")
-        if not port:
-            port = 5405
-        if int(port) >= 1024 and int(port) <= 65535:
-            return port
-        else:
-            pass
+    msg = "Input port [5405]: "
+    return _input(msg, 5405, validate_port)
 
 
 if __name__ == '__main__':
@@ -131,7 +117,7 @@ if __name__ == '__main__':
     p_info("Port:            %s" % cluster_port)
 
     print("")
-    service_string = "base sbd vip ocfs2"
-    services = choose_services(service_string)
+    service_list = "base sbd vip ocfs2".split()
+    services = choose_services(service_list)
     print("")
     p_info("Services: %s" % ' '.join(services))
