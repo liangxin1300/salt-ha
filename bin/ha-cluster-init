@@ -19,16 +19,20 @@ _BOLD = '\033[1m'
 _END = '\033[0m'
 
 
+def p_base(_type, msg):
+    print(_type + _BOLD + msg + _BOLD + _END)
+
+
 def p_info(msg):
-    print(_OK + _BOLD + msg + _BOLD + _END)
+    p_base(_OK, "Info: %s" % msg)
 
 
 def p_warning(msg):
-    print(_WARNING + _BOLD + msg + _BOLD + _END)
+    p_base(_WARNING, "Warning: %s" % msg)
 
 
 def p_err(msg):
-    print(_ERROR + _BOLD + msg + _BOLD + _END)
+    p_base(_ERROR, "Error: %s" % msg)
 
 
 def raw_input(prompt=""):
@@ -45,17 +49,34 @@ def validate_cluster_nodes(origin, _inputs):
     _nodes = re.split(r'[ ,|]', _inputs)
     for _node in _nodes:
         if _node not in origin:
-            p_err("Error: %s not in [%s]" % (_node, ' '.join(origin)))       
+            p_err("'%s' not in [%s]" % (_node, ' '.join(origin)))
             return False
     return True
 
 
-if __name__ == '__main__':
-    local = salt.client.LocalClient()
-    res = local.cmd('*', 'network.subnets')
-    node_list = list(res.keys())
-
+def choose_cluster_nodes(nodes_list):
     _nodes = raw_input("Input cluster nodes [%s]: " % ' '.join(node_list))
     if not validate_cluster_nodes(node_list, _nodes):
         sys.exit(1)
+    return re.split(r'[ ,|]', _nodes)
 
+
+def choose_bindnet_address(data, cluster_nodes):
+    _temp = set(data[cluster_nodes[0]])
+    if len(cluster_nodes) > 1:
+        for node in cluster_nodes[1:]:
+            _temp &= set(data[node])
+    _common_addrs = [ x.split('/')[0] for x in _temp ]
+
+    _addr = raw_input("Input bindnet address [%s]:" % ' '.join(_common_addrs))
+    if _addr not in _common_addrs:
+        p_err("'%s' not in [%s]" % (_addr, ' '.join(_common_addrs)))
+
+
+if __name__ == '__main__':
+
+    local = salt.client.LocalClient()
+    res = local.cmd('*', 'network.subnets')
+    node_list = list(res.keys())
+    cluster_nodes   = choose_cluster_nodes(node_list)
+    bindnet_address = choose_bindnet_address(res, cluster_nodes)
