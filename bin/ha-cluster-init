@@ -40,7 +40,7 @@ def raw_input(prompt=""):
         text = input(prompt)
     except KeyboardInterrupt:
         print("\nbye")
-        return 
+        sys.exit(1)
     
     return text.strip()
 
