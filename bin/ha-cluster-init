@@ -45,7 +45,7 @@ def raw_input(prompt=""):
     return text.strip()
 
 
-def validate_data(origin, _inputs):
+def validate_data(_inputs, origin):
     _items = re.split(r'[ ,|]', _inputs)
     for _item in _items:
         if _item not in origin:
@@ -54,13 +54,26 @@ def validate_data(origin, _inputs):
     return True
 
 
-def choose_cluster_nodes(nodes_list):
+def validate_port(port, data=None):
+    if int(port) >= 1024 and int(port) <= 65535:
+        return True
+    else:
+        p_err("'%s' is invalid" % port)
+        return False
+
+
+def _input(msg, default, val_func, data=None):
     while True:
-        _nodes = raw_input("Input cluster nodes [%s]: " % ' '.join(node_list))
-        if not _nodes:
-            _nodes = ' '.join(node_list)
-        if validate_data(node_list, _nodes):
-            return re.split(r'[ ,|]', _nodes)
+        _res = raw_input(msg)
+        if not _res:
+            _res = default
+        if val_func(_res, data):
+            return re.split(r'[ ,|]', _res)
+
+
+def choose_cluster_nodes(nodes_list):
+    msg = "Input cluster nodes [%s]: " % ' '.join(node_list)
+    return _input(msg, ' '.join(node_list), validate_data, node_list)
 
 
 def choose_bindnet_address(data, cluster_nodes):
@@ -70,15 +83,16 @@ def choose_bindnet_address(data, cluster_nodes):
             _temp &= set(data[node])
     _common_addrs = [ x.split('/')[0] for x in _temp ]
 
+    msg = "Input bindnet address [%s]:" % ' '.join(_common_addrs)
+    return _input(msg, _common_addrs[0], validate_data, _common_addrs)
+    """
     while True:
         _addr = raw_input("Input bindnet address [%s]:" % ' '.join(_common_addrs))
         if not _addr:
             _addr = _common_addrs[0]
-        if _addr not in _common_addrs:
-            p_err("'%s' not in [%s]" % (_addr, ' '.join(_common_addrs)))
-        else:
+        if validate_data(_common_addrs, _addr):
             return _addr
-
+    """
 
 def choose_services(services):
     while True:
@@ -97,7 +111,7 @@ def input_cluster_port():
         if int(port) >= 1024 and int(port) <= 65535:
             return port
         else:
-            p_err("'%s' is invalid" % port)
+            pass
 
 
 if __name__ == '__main__':
