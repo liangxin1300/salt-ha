@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-
-# link to salt runner
-# [10.10.10.0]
-# [239.137.131.248]
-# [5405]
-
-# sbd
-
 import sys
 import re
 import salt.client
@@ -111,7 +103,6 @@ if __name__ == '__main__':
     bindnet_address = choose_bindnet_address(res, cluster_nodes)
     cluster_port    = input_cluster_port()
 
-    print("")
     p_info("Cluster nodes:   [%s]" % ' '.join(cluster_nodes))
     p_info("Bindnet address: %s" % bindnet_address)
     p_info("Port:            %s" % cluster_port)
@@ -119,5 +110,4 @@ if __name__ == '__main__':
     print("")
     service_list = "base sbd vip ocfs2".split()
     services = choose_services(service_list)
-    print("")
     p_info("Services: %s" % ' '.join(services))
